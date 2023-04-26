@@ -89,6 +89,7 @@ class App():
         dpg.delete_item(self.wdw_association_rules, children_only=True)
         dpg.delete_item(self.wdw_frequent_itemsets, children_only=True)
         dpg.delete_item(self.wdw_frequent_itemsets, children_only=True)
+        dpg.delete_item(self.plot, children_only=True)
         # dpg.delete_item(self.wdw_minsup_row, children_only=True)
         if(not self.filePath):
            dpg.configure_item(self.warningTxt, show=True)
@@ -97,7 +98,6 @@ class App():
             dpg.configure_item(self.warningTxt, show=False)
             dpg.configure_item(self.wdw_association_rules, show=True)
             dpg.configure_item(self.wdw_frequent_itemsets, show=True)
-            dpg.configure_item(self.wdw_plot, show=True)
             # dpg.configure_item(self.wdw_minsup_row, show=True)
 
             minSup = dpg.get_value(self.slider_minsup)
@@ -108,7 +108,7 @@ class App():
             print("Min support = ", minSup)
             print("Min confidence = ", minConfidence)
 
-            association_rules, frequent_itemsets = algo.Apriori(data, minSup, minConfidence, contribution=self.contribution, closed=True)
+            association_rules, closed_itemsets= algo.Close(data, minSup)
             if len(association_rules) < 1 or association_rules == None:
                  dpg.add_text("Aucune règle d'association n'est \nextraite pour ces paramètres",wrap=0, parent=self.wdw_association_rules, color=[255,0,0] )
          
@@ -117,8 +117,8 @@ class App():
                     paragraph1 = f"{set(antecedent)} => {set(consequent)} \tConfiance = {confidence} \t lift={lift}"
                     dpg.add_text(paragraph1, wrap=0, parent=self.wdw_association_rules)
             
-            for fi in frequent_itemsets: 
-                dpg.add_text(set(fi), wrap=0, parent=self.wdw_frequent_itemsets)
+            for itemset, fermeture in closed_itemsets: 
+                dpg.add_text(str(set(itemset)) +" fermeture: " + str(fermeture), wrap=0, parent=self.wdw_frequent_itemsets)
 
             item_counts = algo.get_item_counts(data)
             items = list(item_counts.keys())
@@ -142,6 +142,9 @@ class App():
     def callback_apriori(self): 
         dpg.delete_item(self.wdw_association_rules, children_only=True)
         dpg.delete_item(self.wdw_frequent_itemsets, children_only=True)
+        dpg.delete_item(self.plot, children_only=True)
+      
+        
         # dpg.delete_item(self.wdw_minsup_row, children_only=True)
         if(not self.filePath):
            dpg.configure_item(self.warningTxt, show=True)
@@ -150,7 +153,7 @@ class App():
             dpg.configure_item(self.warningTxt, show=False)
             dpg.configure_item(self.wdw_association_rules, show=True)
             dpg.configure_item(self.wdw_frequent_itemsets, show=True)
-            dpg.configure_item(self.wdw_plot, show=True)
+            
 
             minSup = dpg.get_value(self.slider_minsup)
             minConfidence = dpg.get_value(self.slider_minConfidence)
@@ -160,7 +163,7 @@ class App():
             print("Min support = ", minSup)
             print("Min confidence = ", minConfidence)
 
-            association_rules, frequent_itemsets = algo.Apriori(data, minSup, minConfidence, contribution = self.contribution, closed=False)
+            association_rules, frequent_itemsets = algo.Apriori(data, minSup, minConfidence, contribution = self.contribution)
             if len(association_rules) < 1 or association_rules == None:
                  dpg.add_text("Aucune règle d'association n'est \nextraite pour ces paramètres",wrap=0, parent=self.wdw_association_rules, color=[255,0,0] )
          
@@ -178,6 +181,7 @@ class App():
             print(items)
             print(values)
             dpg.add_pie_series(0.5, 0.5, 0.5, values, items, parent=self.plot)
+            dpg.configure_item(self.wdw_plot, show=True)
 
             # if(self.contribution):
             #     for (Minsup, FI_len) in algo.minsup_FI_list:
