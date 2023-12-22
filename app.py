@@ -9,8 +9,14 @@ class App():
         By OMARI Hamza. 
     """
     def __init__(self):
-        # APP settings attributes
-        dpg.set_global_font_scale(1.75)
+        
+        # Set default font to
+        with dpg.font_registry():
+            default_font = dpg.add_font(
+                "resources/fonts/Roboto_Mono/static/RobotoMono-Regular.ttf",23)
+        dpg.bind_font(default_font)
+
+
         # State attributes
         self.fileLoaded = False
 
@@ -37,36 +43,83 @@ class App():
         self.warningTxt = None
         self.textArea=[]
 
-        with dpg.window(label="Main Window", no_resize=True, no_close=True,no_open_over_existing_popup=True,
-         width=300, height=355, no_collapse=True, no_move=True ) as self.wdw_main:
-            dpg.add_text('Apriori et Close \nTP FD\nBy zamas24')
-            with dpg.file_dialog(directory_selector=False, show=False, callback=self.callback_file_dialog, file_count=3,  width=700 ,height=450) as self.fileDialog:
+        with dpg.window(
+            label="Main Window",
+            no_resize=True, 
+            no_close=True,
+            no_open_over_existing_popup=True,
+            width=300, height=355, no_collapse=True, 
+            no_move=True 
+        )as self.wdw_main:
+            
+            dpg.add_text('Apriori et Close \nAssociation rules extractor\nBy zamas24')
+
+            with dpg.file_dialog(
+                directory_selector=False, 
+                show=False, 
+                callback=self.callback_file_dialog, 
+                file_count=3,  width=700 ,height=450
+            ) as self.fileDialog:
                 dpg.add_file_extension(".csv", color=(255, 255, 0, 255))
-            self.btn_file = dpg.add_button(label="Choisir un fichier",  callback=lambda: dpg.show_item(self.fileDialog))
+
+
+            self.btn_file = dpg.add_button(
+                label="Choisir un fichier",  
+                callback=lambda: dpg.show_item(self.fileDialog)
+            )
             
             
-            self.slider_minsup = dpg.add_slider_float(label="Minsup", default_value=0.5, max_value=1)
+            self.slider_minsup = dpg.add_slider_float(
+                label="Minsup", 
+                default_value=0.5, max_value=1
+            
+            )
+
             # dpg.add_spacing(count=10)
-            self.slider_minConfidence = dpg.add_slider_float(label="Min Confidence", default_value = 0.5, max_value = 1)
+            self.slider_minConfidence = dpg.add_slider_float(
+                label="Min \nConfidence", 
+                default_value = 0.5, max_value = 1
+            )
 
             
-            checkbox_id = dpg.add_checkbox(label="Contribution", callback=self.callback_checkbox)
+            checkbox_id = dpg.add_checkbox(
+                label="Contribution", 
+                callback=self.callback_checkbox
+            )
 
-            self.btn_apriori = dpg.add_button(label='Apriori',callback = self.callback_apriori)
-            # dpg.add_same_line()
+
+            self.btn_apriori = dpg.add_button(
+                label='Apriori', callback = self.callback_apriori
+            )
+            
+            
             self.btn_close = dpg.add_button(label='Close', callback = self.callback_close)
             self.warningTxt = dpg.add_text("Please give a valid \nfile", color=[255,0,0], show=False)
 
 
 
-        with dpg.window(label="Règles d'associations , Confiance, lift",show= False, no_resize=False ,no_open_over_existing_popup=True, pos=(310,0) ,width=320, height=250 ) as self.wdw_association_rules:
-                 dpg.add_button(label="AddText", callback=self.callback_addText, show=False)
+        with dpg.window(
+            label="Règles d'associations , Confiance, lift",
+            show= False, no_resize=False, 
+            no_open_over_existing_popup=True, 
+            pos=(310,0) ,width=320, height=250 
+        ) as self.wdw_association_rules:
+            dpg.add_button(label="AddText", callback=self.callback_addText, show=False)
 
-        with dpg.window(label="Itemsets Fréquents", show = False, no_resize=False, pos=(640,0) ,width=320, height=250 ) as self.wdw_frequent_itemsets:
-             pass
+
+        with dpg.window(
+            label="Itemsets Fréquents", 
+            show = False, no_resize=False, 
+            pos=(640,0) ,width=320, height=250 
+        ) as self.wdw_frequent_itemsets:
+            pass
         
-        with dpg.window(label="Items piechart", pos=(500,300), show=False) as self.wdw_plot:
 
+        with dpg.window(
+            label="Items piechart", 
+            pos=(500,300), show=False
+        ) as self.wdw_plot:
+            
             # create plot 1
             with dpg.plot(no_title=True, no_mouse_pos=True, width=250, height=250):
 
@@ -74,16 +127,22 @@ class App():
                 dpg.add_plot_legend(label="Compte de chaque item")
 
                 # create x axis
-                dpg.add_plot_axis(dpg.mvXAxis, label="", no_gridlines=True, no_tick_marks=True, no_tick_labels=True)
+                dpg.add_plot_axis(
+                    dpg.mvXAxis, 
+                    label="", no_gridlines=True, no_tick_marks=True, 
+                    no_tick_labels=True
+                )
                 dpg.set_axis_limits(dpg.last_item(), 0, 1)
 
                 # create y axis
-                with dpg.plot_axis(dpg.mvYAxis, label="", no_gridlines=True, no_tick_marks=True, no_tick_labels=True) as self.plot:
+                with dpg.plot_axis(
+                    dpg.mvYAxis, label="", 
+                    no_gridlines=True, 
+                    no_tick_marks=True, no_tick_labels=True
+                ) as self.plot:
                     dpg.set_axis_limits(dpg.last_item(), 0, 1)
 
-        # with dpg.window(label="Variation minSup et Itemset frequents",pos=(800,400), show=False)as self.wdw_minsup_row:
-        #    with dpg.table(header_row=False, row_background=True,delay_search=True) as self.table_id:
-        #             pass
+    
               
     def callback_close(self): 
         dpg.delete_item(self.wdw_association_rules, children_only=True)
@@ -206,12 +265,10 @@ class App():
 
     
 
-
-
 # Dearpygui inits stuff: 
 dpg.create_context()
 App()
-dpg.create_viewport(title='Apriori And close', width=1080, height=720, resizable=False)
+dpg.create_viewport(title='Apriori And close', width=1080, height=720)
 dpg.setup_dearpygui()
 dpg.show_viewport()
 dpg.start_dearpygui()
