@@ -1,6 +1,7 @@
 # Apriori-Close
 An implementation of the Apriori and Close association rules mining Algorithms. With a beautiful dearpygui GUI.
 
+![App Screenshot]( demo/dermo.jpg "App schreenshot")
 
 
 
